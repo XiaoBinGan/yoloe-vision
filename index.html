@@ -1,0 +1,89 @@
+
+
+    setIsLoading(false);
+  };
+
+  const handleDownloadResult = () => {
+    if (!canvasRef.current) return;
+    const link = document.createElement('a');
+    link.href = canvasRef.current.toDataURL('image/jpeg', 0.92);
+    link.download = `yoloe_detection_${Date.now()}.jpg`;
+    link.click();
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0f1117]">
+      <Header status={modelStatus} />
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+          {/* LEFT: Controls */}
+          <div className="lg:col-span-2 space-y-4">
+            <UploadZone onFileSelect={handleFileSelect} file={uploadedFile} fileUrl={uploadedFileUrl} fileType={fileType} />
+            <ModeSelector mode={mode} onModeChange={m => { setMode(m); setResult(null); }} />
+            <TextPromptInput mode={mode} textPrompt={textPrompt} onTextChange={setTextPrompt} refImage={refImage} onRefImageChange={setRefImage} />
+            <ParameterPanel confThreshold={confThreshold} iouThreshold={iouThreshold} onConfChange={v => { setConfThreshold(v); setResult(null); }} onIouChange={v => { setIouThreshold(v); setResult(null); }} />
+
+            <button
+              onClick={handleDetect}
+              disabled={isLoading || !uploadedFile}
+              className={`w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                !uploadedFile || isLoading
+                  ? 'bg-[#21253a] text-slate-500 border border-[#2a2d3a]'
+                  : 'bg-[#10b981] hover:bg-[#34d399] text-white shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] active:scale-[0.98]'
+              }`}>
+              {isLoading ? (
+                <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full spin" /> 检测中...</>
+              ) : (
+                <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> 开始检测</>
+              )}
+            </button>
+
+            {error && (
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <p>{error}</p>
+              </div>
+            )}
+
+            <div className="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl p-4 space-y-3">
+              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">💡 使用提示</p>
+              <div className="space-y-2 text-xs text-slate-500">
+                <div className="flex gap-2"><span className="text-[#10b981]">✏️</span><span><b className="text-slate-300">文本提示：</b>输入类别名称（逗号分隔），支持任意物体描述</span></div>
+                <div className="flex gap-2"><span className="text-[#3b82f6]">🖼️</span><span><b className="text-slate-300">图像参考：</b>上传参考图，检测视觉相似的目标</span></div>
+                <div className="flex gap-2"><span className="text-[#f59e0b]">📋</span><span><b className="text-slate-300">无提示：</b>使用内置 1200+ 类别自动检测</span></div>
+                <div className="flex gap-2"><span className="text-[#ec4899]">⌨️</span><span><b className="text-slate-300">快捷键：</b>Ctrl+V 粘贴图片 / Ctrl+Enter 检测</span></div>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT: Results */}
+          <div className="lg:col-span-3">
+            <ResultPanel
+              result={result}
+              detections={detections}
+              stats={stats}
+              isLoading={isLoading}
+              canvasRef={canvasRef}
+              uploadedFileUrl={uploadedFileUrl}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+            />
+          </div>
+        </div>
+      </main>
+
+      <footer className="border-t border-[#2a2d3a] mt-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between text-xs text-slate-600">
+          <span>Powered by <span className="text-[#10b981]">YOLOE-26</span> · Ultralytics</span>
+          <span>开放词汇实时目标检测 & 实例分割</span>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
